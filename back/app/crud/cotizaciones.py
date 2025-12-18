@@ -2,13 +2,30 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from bson import ObjectId
 from pymongo.database import Database
 
 from app.models.cotizaciones import COTIZACIONES_COLLECTION, IVA_RATE
 from app.models.locales import LOCALES_COLLECTION, STATUS_DISPONIBLE
+
+async def list_cotizaciones_by_email(db: Database[Any], email: str) -> List[dict]:
+    normalized = email.lower().strip()
+
+    cursor = (
+        db[COTIZACIONES_COLLECTION]
+        .find({"prospecto_email": normalized})
+        .sort("created_at", -1)
+        .limit(200)
+    )
+
+    items: List[dict] = []
+    async for doc in cursor:
+        doc["id"] = str(doc.pop("_id"))
+        items.append(doc)
+
+    return items
 
 
 async def create_cotizacion(
