@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
-
+from fastapi import HTTPException
 from pymongo.database import Database
 
 from app.models.locales import LOCALES_COLLECTION, STATUS_DISPONIBLE
@@ -78,3 +78,19 @@ async def list_locales(
 
     items = [doc async for doc in cursor]
     return items, total
+
+
+async def get_local_by_codigo(db: Database[Any], codigo: str) -> dict:
+    col = db[LOCALES_COLLECTION]
+    doc = await col.find_one({"codigo": codigo}, {"_id": 0})
+    if doc is None:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": {
+                    "code": "LOCAL_NOT_FOUND",
+                    "message": f"Local '{codigo}' no existe.",
+                }
+            },
+        )
+    return doc

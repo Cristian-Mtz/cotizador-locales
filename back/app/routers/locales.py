@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Path
 from pymongo.database import Database
 
 from app.crud.locales import list_locales
 from app.dependencies import get_db
-from app.schemas.locales import LocalesListResponse
+from app.schemas.locales import LocalesListResponse, LocalOut
 from app.utils.pagination import total_pages
+from app.crud.locales import get_local_by_codigo
 
 router = APIRouter(prefix="/locales", tags=["locales"])
 
@@ -44,3 +45,11 @@ async def get_locales(
         total=total,
         total_pages=total_pages(total, page_size),
     )
+
+@router.get("/{codigo}", response_model=LocalOut)
+async def get_local_detail(
+    codigo: str = Path(..., description="Código del local (ej: L-A-001)"),
+    db: Database[Any] = Depends(get_db),
+) -> LocalOut:
+    doc = await get_local_by_codigo(db, codigo=codigo)
+    return doc
