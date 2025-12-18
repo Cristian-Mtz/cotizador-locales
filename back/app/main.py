@@ -13,8 +13,6 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymongo import AsyncMongoClient
 
-from app.routers.items import router as items_router
-from app.routers.users import router as users_router
 from app.routers.locales import router as locales_router
 from app.routers.cotizaciones import router as cotizaciones_router
 
@@ -124,7 +122,5 @@ async def health():
     return {"status": "ok", "mongo_connected": bool(getattr(app.state, "mongo_ready", False))}
 
 
-app.include_router(items_router, prefix=settings.api_v1_prefix)
-app.include_router(users_router, prefix=settings.api_v1_prefix)
 app.include_router(locales_router, prefix=settings.api_v1_prefix)
 app.include_router(cotizaciones_router, prefix=settings.api_v1_prefix)
