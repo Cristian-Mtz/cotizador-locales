@@ -2,6 +2,7 @@ fastapi[standard]==0.125.0
 pydantic==2.12.5
 pydantic-settings==2.12.0
 pymongo==4.15.5
+email-validator>=2.0.0
 
 # Dev tools (optional but recommended)
 ruff==0.14.9
