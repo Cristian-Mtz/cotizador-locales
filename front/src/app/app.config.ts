@@ -5,10 +5,37 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideApiBaseUrl } from './core/data-access/api-base-url';
 
+import { isDevMode } from '@angular/core';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes), provideClientHydration(withEventReplay()),
-    provideApiBaseUrl()
-  ]
+    provideRouter(routes),
+    provideClientHydration(withEventReplay()),
+    provideApiBaseUrl(),
+    provideStore(
+      {},
+      {
+        runtimeChecks: {
+          strictStateImmutability: true,
+          strictActionImmutability: true,
+          strictStateSerializability: true,
+          strictActionSerializability: true,
+        },
+      }
+    ),
+    provideEffects(),
+
+    ...(isDevMode()
+      ? [
+          provideStoreDevtools({
+            maxAge: 25,
+            logOnly: false,
+          }),
+        ]
+      : []),
+  ],
 };
