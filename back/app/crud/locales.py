@@ -1,27 +1,17 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
-from fastapi import HTTPException
 from pymongo.database import Database
+from app.models.locales import LOCALES_COLLECTION
 
-from app.models.locales import LOCALES_COLLECTION, STATUS_DISPONIBLE
-
-
-def build_locales_query(
-    *,
-    codigo: Optional[str],
-    pabellon: Optional[str],
-    area_min: Optional[float],
-    area_max: Optional[float],
-    precio_min: Optional[int],
-    precio_max: Optional[int],
-) -> Dict[str, Any]:
-    # ! BetterComments: el enunciado pide "locales disponibles", así que forzamos status=disponible
-    query: Dict[str, Any] = {"status": STATUS_DISPONIBLE}
-
+def build_query(*, status: Optional[str], codigo: Optional[str], pabellon: Optional[str],
+                area_min: Optional[float], area_max: Optional[float],
+                precio_min: Optional[int], precio_max: Optional[int]) -> Dict[str, Any]:
+    query: Dict[str, Any] = {}
+    if status:
+        query["status"] = status
     if codigo:
         query["codigo"] = codigo
-
     if pabellon:
         query["pabellon"] = pabellon
 
@@ -41,56 +31,14 @@ def build_locales_query(
 
     return query
 
-
-async def list_locales(
-    db: Database[Any],
-    *,
-    codigo: Optional[str],
-    pabellon: Optional[str],
-    area_min: Optional[float],
-    area_max: Optional[float],
-    precio_min: Optional[int],
-    precio_max: Optional[int],
-    page: int,
-    page_size: int,
-) -> Tuple[List[dict], int]:
-    query = build_locales_query(
-        codigo=codigo,
-        pabellon=pabellon,
-        area_min=area_min,
-        area_max=area_max,
-        precio_min=precio_min,
-        precio_max=precio_max,
-    )
-
-    collection = db[LOCALES_COLLECTION]
-
-    total = await collection.count_documents(query)
-
+async def list_locales(db: Database[Any], *, query: Dict[str, Any], page: int, page_size: int) -> Tuple[List[dict], int]:
+    col = db[LOCALES_COLLECTION]
+    total = await col.count_documents(query)
     skip = (page - 1) * page_size
-
-    cursor = (
-        collection.find(query, {"_id": 0})
-        .sort("codigo", 1)
-        .skip(skip)
-        .limit(page_size)
-    )
-
+    cursor = col.find(query, {"_id": 0}).sort("codigo", 1).skip(skip).limit(page_size)
     items = [doc async for doc in cursor]
     return items, total
 
-
-async def get_local_by_codigo(db: Database[Any], codigo: str) -> dict:
+async def get_by_codigo(db: Database[Any], codigo: str) -> Optional[dict]:
     col = db[LOCALES_COLLECTION]
-    doc = await col.find_one({"codigo": codigo}, {"_id": 0})
-    if doc is None:
-        raise HTTPException(
-            status_code=404,
-            detail={
-                "error": {
-                    "code": "LOCAL_NOT_FOUND",
-                    "message": f"Local '{codigo}' no existe.",
-                }
-            },
-        )
-    return doc
+    return await col.find_one({"codigo": codigo}, {"_id": 0})

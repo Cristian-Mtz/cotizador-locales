@@ -1,67 +1,37 @@
-# ===== Python =====
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Byte-compiled / optimized / DLL files
-*.so
-
-# ===== Virtualenv =====
+# venv
 .venv/
 venv/
-ENV/
-env/
 
-# ===== Environment variables =====
+# env
 .env
 .env.*
 !.env.example
 
-# ===== Packaging / build =====
-build/
-dist/
-*.egg-info/
-.eggs/
-pip-wheel-metadata/
-
-# ===== Test / coverage =====
+# caches
 .pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.coverage.xml
-nosetests.xml
-pytestdebug.log
-test-results/
 .mypy_cache/
-
-# ===== Lint / format tools =====
 .ruff_cache/
-.cache/
-.pyre/
-.pytype/
+.coverage
+htmlcov/
 
-# ===== Logs =====
-*.log
-logs/
-*.pid
+# build
+dist/
+build/
+*.egg-info/
 
-# ===== IDEs / Editors =====
+# IDE
 .vscode/
 .idea/
-*.iml
 
-# ===== OS =====
+# OS
 .DS_Store
 Thumbs.db
 
-# ===== Docker =====
-**/.dockerignore
-
-# ===== FastAPI / Uvicorn =====
-# (No files by default, but keep patterns if you later generate these)
-*.sqlite3
-
-# ===== Local artifacts =====
-tmp/
-temp/
+# logs
+*.log
+logs/
