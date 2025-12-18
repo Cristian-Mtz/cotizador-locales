@@ -24,6 +24,7 @@ source .venv/bin/activate
 python -m pip install -U pip
 pip install -r requirements.txt
 cp .env.example .env
+python -m scripts.seed_locales --drop
 
 uvicorn app.main:app --reload --port 8000
 ```
