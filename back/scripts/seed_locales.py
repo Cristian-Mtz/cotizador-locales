@@ -137,7 +137,7 @@ async def run(drop: bool) -> None:
     try:
         await col.insert_many(docs, ordered=False)
     except Exception:
-        # Si ya existían algunos por codigo unique, no rompemos el seed (ordered=False ayuda).
+        # Si ya existían algunos por codigo unique, no rompemos el seed (ordered=False).
         pass
 
     total = await col.count_documents({})
