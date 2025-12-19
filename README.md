@@ -6,7 +6,7 @@ Monorepo con **Backend (FastAPI + MongoDB)** y **Frontend (Angular Standalone + 
 
 ## Demo (Deploy)
 
-- **Frontend (Vercel):** https://vercel.com/cristian-martinez-lazaros-projects/cotizador-locales/ASZGmMVVNPeYYv9s2oPuu5gpXBR6  
+- **Frontend (Vercel):** https://cotizador-locales.vercel.app/ 
   > Nota: este enlace es del proyecto/deployment en Vercel. Si tienes un dominio público tipo `https://<app>.vercel.app`, agrégalo aquí.
 
 - **Backend (Render) – Swagger/OpenAPI:** https://cotizador-locales.onrender.com/docs
