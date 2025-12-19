@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://cotizador-locales.onrender.com/"
+      "destination": "https://cotizador-locales.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
