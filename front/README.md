@@ -2,8 +2,6 @@
 
 Frontend del proyecto **Cotizador de Locales**, construido con **Angular (standalone) + TailwindCSS + NgRx** y enfocado en una arquitectura mantenible por **scopes**: `feature / ui / data-access / util`.
 
-Este README es **solo del frontend**. Más adelante habrá un **README general en la raíz** con los **URLs de despliegue** (Front/Back).
-
 ---
 
 ## Stack
@@ -58,8 +56,6 @@ En desarrollo usamos **proxy** para evitar CORS y mantener el frontend consumien
 
 Esto permite que el `API_BASE_URL` sea **`/api`** en el frontend (sin hardcodear host/puerto).
 
-> Nota importante: el API base URL **no es un secreto**; lo “seguro” es **no incluir secretos** (tokens privados, keys, etc.) en el bundle del navegador.
-
 ---
 
 ## Scripts
@@ -69,14 +65,6 @@ npm start         # dev server (con proxy)
 npm run build     # build (incluye SSR si está configurado)
 npm test          # tests
 ```
-
-Si tu proyecto SSR tiene el script:
-```bash
-npm run serve:ssr:front
-```
-
-> Ajusta el script de SSR según el output real de tu build (`dist/<app>/server/server.mjs`).
-
 ---
 
 ## Rutas principales
@@ -196,24 +184,3 @@ Siguiente paso recomendado:
   - toasts
   - manejo uniforme de errores (mismo shape del backend)
 - Runtime config para `API_BASE_URL` (por entorno) sin rebuild, usando SSR server o rewrites.
-
----
-
-## Troubleshooting
-
-### El proxy no aplica / sigue pegando al host viejo
-Reinicia el dev server:
-
-```bash
-# Ctrl+C
-npm start
-```
-
-Angular CLI no siempre recarga el proxy/config al vuelo.
-
-### Error NG0203 (inject outside injection context)
-Evita usar `inject()` dentro de helpers “puros” que se ejecuten fuera de DI.
-Inyecta tokens (ej. `API_BASE_URL`) directamente en servicios / clases.
-
-### Leaflet no carga en SSR
-Asegura que Leaflet se inicializa **solo en browser** (client-only) y que el CSS de Leaflet está incluido en `styles.css`.

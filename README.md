@@ -7,8 +7,6 @@ Monorepo con **Backend (FastAPI + MongoDB)** y **Frontend (Angular Standalone + 
 ## Demo (Deploy)
 
 - **Frontend (Vercel):** https://cotizador-locales.vercel.app/ 
-  > Nota: este enlace es del proyecto/deployment en Vercel. Si tienes un dominio público tipo `https://<app>.vercel.app`, agrégalo aquí.
-
 - **Backend (Render) – Swagger/OpenAPI:** https://cotizador-locales.onrender.com/docs
 
 ---
@@ -85,8 +83,6 @@ El frontend consume el API en ruta relativa **`/api`**. En dev, se recomienda pr
 
 ## Endpoints principales
 
-> Nota: el prefijo puede ser `/api` según la configuración del backend.
-
 - `GET /api/locales`  
   Lista de locales con paginación.
 
@@ -150,9 +146,6 @@ Config recomendado en Render (Web Service):
       ]
     }
     ```
-
-> Si tu backend NO usa prefijo `/api`, cambia el destino a `https://cotizador-locales.onrender.com/$1`.
-
 ---
 
 ## Mejoras futuras (no funcionalidad)
