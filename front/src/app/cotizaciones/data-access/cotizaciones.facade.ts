@@ -7,6 +7,9 @@ import {
   selectCreateError,
   selectCreateStatus,
   selectLastCreated,
+  selectItems,
+  selectListError,
+  selectListStatus,
 } from './store/cotizaciones.selectors';
 
 @Injectable({ providedIn: 'root' })
@@ -17,11 +20,23 @@ export class CotizacionesFacade {
   readonly createError$ = this.store.select(selectCreateError);
   readonly lastCreated$ = this.store.select(selectLastCreated);
 
+  readonly listStatus$ = this.store.select(selectListStatus);
+  readonly listError$ = this.store.select(selectListError);
+  readonly items$ = this.store.select(selectItems);
+
   create(payload: CotizacionCreate): void {
     this.store.dispatch(CotizacionesActions.create({ payload }));
   }
 
   clearCreateStatus(): void {
     this.store.dispatch(CotizacionesActions.clearCreateStatus());
+  }
+
+  loadByEmail(email: string): void {
+    this.store.dispatch(CotizacionesActions.loadByEmail({ email }));
+  }
+
+  clearList(): void {
+    this.store.dispatch(CotizacionesActions.clearList());
   }
 }

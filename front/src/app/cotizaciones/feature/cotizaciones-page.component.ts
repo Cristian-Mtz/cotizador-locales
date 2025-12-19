@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -16,7 +16,11 @@ import { CotizacionesFacade } from '../data-access/cotizaciones.facade';
         <p class="text-sm text-zinc-300">Crea una cotización por local + email.</p>
       </div>
 
-      <form class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 space-y-3" [formGroup]="form" (ngSubmit)="submit()">
+      <form
+        class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 space-y-3"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+      >
         <div class="grid gap-3 sm:grid-cols-2">
           <label class="space-y-1">
             <div class="text-xs text-zinc-400">Email del prospecto</div>
@@ -65,24 +69,65 @@ import { CotizacionesFacade } from '../data-access/cotizaciones.facade';
             @if (createStatus() === 'saving') { Guardando... } @else { Crear cotización }
           </button>
 
-          <button type="button" class="rounded-xl bg-zinc-900 px-3 py-2 text-sm border border-zinc-800 hover:bg-zinc-800" (click)="reset()">
+          <button
+            type="button"
+            class="rounded-xl bg-zinc-900 px-3 py-2 text-sm border border-zinc-800 hover:bg-zinc-800"
+            (click)="reset()"
+          >
             Limpiar
+          </button>
+
+          <button
+            type="button"
+            class="rounded-xl bg-zinc-900 px-3 py-2 text-sm border border-zinc-800 hover:bg-zinc-800"
+            (click)="loadHistory()"
+            [disabled]="form.controls.prospecto_email.invalid || listStatus() === 'loading'"
+          >
+            @if (listStatus() === 'loading') { Buscando... } @else { Ver historial }
           </button>
         </div>
 
         @if (createStatus() === 'error') {
-          <div class="text-sm text-red-300">Error: {{ createError() }}</div>
-        }
-
-        @if (createStatus() === 'saved' && lastCreated()) {
-          <div class="rounded-xl border border-emerald-900 bg-emerald-950/30 p-3 text-sm">
-            <div class="font-semibold text-emerald-200">Cotización creada</div>
-            <div class="text-emerald-200/80">
-              Total: ${'$'}{{ lastCreated()!.total }} · Subtotal: ${'$'}{{ lastCreated()!.subtotal }} · IVA: ${'$'}{{ lastCreated()!.iva }}
-            </div>
+        <div class="text-sm text-red-300">Error: {{ createError() }}</div>
+        } @if (createStatus() === 'saved' && lastCreated()) {
+        <div class="rounded-xl border border-emerald-900 bg-emerald-950/30 p-3 text-sm">
+          <div class="font-semibold text-emerald-200">Cotización creada</div>
+          <div class="text-emerald-200/80">
+            Total: ${'$'}{{ lastCreated()!.total }} · Subtotal: ${'$'}{{
+              lastCreated()!.subtotal
+            }}
+            · IVA: ${'$'}{{ lastCreated()!.iva }}
           </div>
+        </div>
         }
       </form>
+
+      @if (listStatus() === 'error') {
+      <div class="text-sm text-red-300">Error historial: {{ listError() }}</div>
+      } @if (sortedItems().length > 0) {
+      <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold">Historial</div>
+          <div class="text-xs text-zinc-400">{{ sortedItems().length }} cotizaciones</div>
+        </div>
+
+        <div class="mt-3 space-y-2">
+          @for (c of sortedItems(); track c.id) {
+          <div class="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-semibold">
+                {{ c.local_codigo }} · {{ c.duracion_meses }} meses
+              </div>
+              <div class="text-sm text-emerald-200 font-semibold">${'$'}{{ c.total }}</div>
+            </div>
+            <div class="mt-1 text-xs text-zinc-400">
+              {{ c.prospecto_email }} · {{ c.created_at }}
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,7 +143,17 @@ export class CotizacionesPageComponent {
 
   readonly localFromQuery = toSignal(
     this.route.queryParamMap.pipe(map((q) => q.get('local') ?? '')),
-    { initialValue: '' },
+    { initialValue: '' }
+  );
+
+  readonly listStatus = toSignal(this.facade.listStatus$, { initialValue: 'idle' as const });
+  readonly listError = toSignal(this.facade.listError$, { initialValue: null });
+  readonly items = toSignal(this.facade.items$, { initialValue: [] });
+
+  readonly sortedItems = computed(() =>
+    [...this.items()].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
   );
 
   form = this.fb.group({
@@ -113,12 +168,21 @@ export class CotizacionesPageComponent {
     if (local) this.form.controls.local_codigo.setValue(local);
   }
 
+  loadHistory(): void {
+    this.facade.loadByEmail(this.form.controls.prospecto_email.value ?? '');
+  }
+
   submit(): void {
     this.facade.create(this.form.getRawValue());
   }
 
   reset(): void {
     this.facade.clearCreateStatus();
-    this.form.reset({ prospecto_email: '', local_codigo: this.localFromQuery() || '', duracion_meses: 6, notas: '' });
+    this.form.reset({
+      prospecto_email: '',
+      local_codigo: this.localFromQuery() || '',
+      duracion_meses: 6,
+      notas: '',
+    });
   }
 }
