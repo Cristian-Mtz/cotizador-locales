@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { provideApiBaseUrl } from './core/data-access/api-base-url';
 
 import { isDevMode } from '@angular/core';
@@ -12,6 +13,10 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(
+      withFetch(),
+      withInterceptorsFromDi()
+    ),
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
