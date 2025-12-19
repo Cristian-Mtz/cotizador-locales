@@ -32,32 +32,42 @@ export class LocalesMapClientComponent implements AfterViewInit, OnChanges {
   private didFit = false;
 
   async ngAfterViewInit(): Promise<void> {
-    const L = (await import('leaflet')) as any;
-    this.L = L;
+    try {
+      const leafletMod: any = await import('leaflet');
+      const L = leafletMod.default ?? leafletMod; // ✅ clave para prod (CJS/UMD)
+      this.L = L;
 
-    // Fix icon URLs (si no lo haces, a veces no se ven los markers)
-    const iconRetinaUrl = new URL(
-      'leaflet/dist/images/marker-icon-2x.png',
-      import.meta.url
-    ).toString();
-    const iconUrl = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).toString();
-    const shadowUrl = new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).toString();
-    L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
+      const iconRetinaUrl = new URL(
+        'leaflet/dist/images/marker-icon-2x.png',
+        import.meta.url
+      ).toString();
+      const iconUrl = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).toString();
+      const shadowUrl = new URL(
+        'leaflet/dist/images/marker-shadow.png',
+        import.meta.url
+      ).toString();
+      L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
 
-    // Init map
-    this.map = L.map(this.mapEl.nativeElement, {
-      zoomControl: true,
-    }).setView([19.4326, -99.1332], 12); // default CDMX
+      this.map = L.map(this.mapEl.nativeElement, { zoomControl: true }).setView(
+        [19.4326, -99.1332],
+        12
+      );
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(this.map);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+      }).addTo(this.map);
 
-    this.markersLayer = L.layerGroup().addTo(this.map);
+      this.markersLayer = L.layerGroup().addTo(this.map);
 
-    // Render inicial
-    this.renderMarkers(this.items());
+      // ✅ evita mapa “en blanco” si el contenedor cambia de tamaño al montar
+      requestAnimationFrame(() => this.map.invalidateSize());
+
+      // Render inicial
+      this.renderMarkers(this.items());
+    } catch (e) {
+      console.error('[Leaflet] failed to init', e);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
