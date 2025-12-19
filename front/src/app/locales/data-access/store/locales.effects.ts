@@ -5,7 +5,7 @@ import { catchError, map, of, switchMap, withLatestFrom } from 'rxjs';
 
 import { LocalesActions } from './locales.actions';
 import { selectLocalesFilters, selectLocalesPage, selectLocalesPageSize } from './locales.selectors';
-import { LocalesApiService } from '../service/locales-api.service';
+import { LocalesApiService } from '../services/locales-api.service';
 
 @Injectable()
 export class LocalesEffects {
