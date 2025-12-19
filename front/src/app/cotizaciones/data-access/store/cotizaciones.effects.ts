@@ -4,6 +4,7 @@ import { catchError, map, of, switchMap } from 'rxjs';
 
 import { CotizacionesActions } from './cotizaciones.actions';
 import { CotizacionesApiService } from '../services/cotizaciones-api.service';
+import { normalizeEmail } from '@locales/util/normalize';
 
 @Injectable()
 export class CotizacionesEffects {
@@ -20,11 +21,29 @@ export class CotizacionesEffects {
             of(
               CotizacionesActions.createFailure({
                 error: err?.error?.error?.message ?? err?.message ?? 'Error creando cotización',
-              }),
-            ),
-          ),
-        ),
-      ),
-    ),
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  loadByEmail$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CotizacionesActions.loadByEmail),
+      switchMap(({ email }) =>
+        this.api.listByEmail(normalizeEmail(email)).pipe(
+          map((items) => CotizacionesActions.loadByEmailSuccess({ items })),
+          catchError((err) =>
+            of(
+              CotizacionesActions.loadByEmailFailure({
+                error: err?.error?.error?.message ?? err?.message ?? 'Error cargando historial',
+              })
+            )
+          )
+        )
+      )
+    )
   );
 }
